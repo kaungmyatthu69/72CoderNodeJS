@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Index</title>
+    <style>
+        .holders{
+            width: 500px;
+            margin: 20px auto;
+        }
+        h1{
+            text-align: center;
+        }
+        .login-form{
+            width: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .login-form input{
+            width: inherit;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .login-form button{
+            width: 20%;
+            margin-left: auto;
+            padding: 10px;
+
+        }
+        .chat-container{
+            height: 300px;
+            /*overflow-y: scroll;*/
+            border: 1px solid #000;
+            padding: 10px;
+        }
+        .chat-form input{
+            width: 80%;
+        }
+        .hide{
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+<div class=" holders">
+    <div class="login-holder">
+        <h1>Login</h1>
+        <div class="login-form">
+            <input id="name" type="text"/>
+            <button id="login">Login</button>
+        </div>
+
+        <button id="gameBtn">Game</button>
+        <button id="bookbtn">Book</button>
+    </div>
+    <div class="chat-holder hide">
+        <h1>Chat Room </h1>
+        <div class="chat-container">
+            <p class="chat-message"></p>
+        </div>
+        <div class="chat-form">
+            <input id="message" type="text"/>
+            <button id="send">Send</button>
+    </div>
+</div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    let loginHolder = document.querySelector('.login-holder');
+    let chatHodler = document.querySelector('.chat-holder');
+    let nameInput = document.getElementById('name');
+    let messageInput = document.getElementById('message');
+    let loginButton = document.getElementById('login');
+    let sendButton = document.getElementById('send');
+    let chatMessage = document.querySelector('.chat-message');
+    let socket =io.connect()
+    let gameSocket = io('/game')
+    let bookSocket = io('/book')
+    let gameBtn = document.getElementById('gameBtn');
+    let bookBtn = document.getElementById('bookbtn');
+
+    loginButton.addEventListener('click', function () {
+        socket.emit('login', nameInput.value);
+    });
+
+    sendButton.addEventListener('click', function () {
+        socket.emit('send_message', messageInput.value);
+        messageInput.value='';
+    });
+
+    gameBtn.addEventListener('click', function () {
+        // alert('123')
+       gameSocket.emit('gameStart', 'Game Started')
+    });
+
+    bookBtn.addEventListener('click', function () {
+        bookSocket.emit('bookStart', 'Book Started')
+    });
+
+    socket.on('logged_in',(data)=>{
+        if(data){
+            loginHolder.classList.add('hide');
+            chatHodler.classList.remove('hide');
+        }
+    })
+
+    socket.on('new_message', (data)=>{
+        let old_data = chatMessage.innerText;
+        chatMessage.innerText = old_data + '\n' + data;
+    });
+</script>
+</body>
+</html>
